@@ -1,0 +1,43 @@
+name: Klädkollen
+on:
+  schedule:
+    - cron: "0 18 * * *"
+    - cron: "0 16 * * 0"
+  workflow_dispatch:
+    inputs:
+      kind:
+        description: daily or weekly
+        default: daily
+
+permissions:
+  contents: write
+
+jobs:
+  card:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q pyswisseph
+      - name: Write config from secret
+        run: echo '${{ secrets.KLADKOLLEN_CONFIG }}' > config.json
+      - name: Decide kind
+        id: kind
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then echo "kind=${{ github.event.inputs.kind }}" >> $GITHUB_OUTPUT
+          elif [ "$(date -u +%u%H)" = "716" ]; then echo "kind=weekly" >> $GITHUB_OUTPUT
+          else echo "kind=daily" >> $GITHUB_OUTPUT; fi
+      - name: Run
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+        run: python run.py ${{ steps.kind.outputs.kind }}
+      - name: Keep the audit log
+        run: |
+          git config user.name kladkollen-bot && git config user.email bot@users.noreply.github.com
+          git add runlog.jsonl && git commit -m "runlog $(date -u +%F)" || true
+          git push || true

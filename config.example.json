@@ -1,0 +1,16 @@
+{
+  "lat": 59.33,
+  "lon": 18.07,
+  "timezone": "Europe/Stockholm",
+  "to": ["you@example.com"],
+  "user_agent": "kladkollen/0.1 github.com/YOURNAME/kladkollen",
+  "weekends": false,
+  "mantra": "This is my movie, everything is working out for me.",
+  "runlog": "runlog.jsonl",
+
+  "_energy_is_optional": "delete the block below for a 4-line card with no astrology. Birthdays are day-month only, no year, and stay on your machine.",
+  "energy": {
+    "location": "stockholm",
+    "people": {"Parent": "01-01", "Kid": "01-01"}
+  }
+}
